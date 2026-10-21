@@ -1,0 +1,16 @@
+symbol,name,asset_id,issuer_id,country,sector,market_cap,adv,price,currency,is_etf,otc
+AAPL,Apple Inc,AAPL,AAPL,United States,Technology Hardware & Equipment,3.4e12,50000000,230.00,USD,,
+MSFT,Microsoft Corp,MSFT,MSFT,United States,Software & Services,3.1e12,20000000,420.00,USD,,
+NVDA,NVIDIA Corp,NVDA,NVDA,United States,Semiconductors & Semiconductor Equipment,4.4e12,180000000,180.00,USD,,
+GOOGL,Alphabet Inc Class A,GOOGL,GOOGL,United States,Media & Entertainment,2.3e12,30000000,190.00,USD,,
+GOOG,Alphabet Inc Class C,GOOG,GOOGL,United States,Media & Entertainment,2.3e12,20000000,192.00,USD,,
+JPM,JPMorgan Chase & Co,JPM,JPM,United States,Banks,6.6e11,9000000,240.00,USD,,
+XOM,Exxon Mobil Corp,XOM,XOM,United States,Energy,4.8e11,15000000,115.00,USD,,
+TSM,Taiwan Semiconductor ADR,2330.TW,2330.TW,"Taiwan, Province of China",Semiconductors & Semiconductor Equipment,1.0e12,12000000,190.00,USD,,
+2330.TW,Taiwan Semiconductor,2330.TW,2330.TW,"Taiwan, Province of China",Semiconductors & Semiconductor Equipment,1.0e12,30000000,1100.00,TWD,,
+7203.T,Toyota Motor Corp,7203.T,7203.T,Japan,Automobiles & Components,2.6e11,25000000,2900,JPY,,
+0700.HK,Tencent Holdings,0700.HK,0700.HK,China Offshore,Media & Entertainment,5.9e11,20000000,480.00,HKD,,
+SMOL,Small Cap Example Co,SMOL,SMOL,United States,Capital Goods,350000000,60000,4.10,USD,,
+TINY,Tiny OTC Example Co,TINY,TINY,United States,Pharmaceuticals Biotechnology & Life Sciences,8000000,5000,0.60,USD,,true
+MEGA,Example Mega-Cap ETF,MEGA,MEGA,United States,ETF,,,100.00,USD,true,
+MEGA3X,Example 3x Mega-Cap ETF,MEGA3X,MEGA3X,United States,ETF,,,45.00,USD,true,
