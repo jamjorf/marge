@@ -1,4 +1,4 @@
-"""Command line interface: ``marge run`` and ``marge leverage``."""
+"""Command line interface: ``marge run``, ``marge check`` and ``marge leverage``."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ import datetime as dt
 import sys
 
 from . import __version__
+from .checks import data_quality, format_quality
 from .config import load_params
 from .engine import compute, max_scale
 from .model import InputError, build_model
@@ -17,7 +18,7 @@ def _common(p: argparse.ArgumentParser) -> None:
     p.add_argument("-p", "--positions", required=True, help="positions CSV")
     p.add_argument("-s", "--securities", help="security master CSV (constituents and held names)")
     p.add_argument("-b", "--baskets", help="ETF holdings CSV (basket, symbol, weight)")
-    p.add_argument("-c", "--config", help="TOML config overriding default parameters")
+    p.add_argument("-c", "--config", help="TOML or JSON config overriding default parameters")
     p.add_argument("--as-of", help="valuation date YYYY-MM-DD (option expiries), default today")
     p.add_argument("--vix", type=float, help="spot VIX level (overrides config)")
     p.add_argument("--vix-ema", type=float, help="5-day EMA of VIX (overrides config)")
@@ -49,6 +50,10 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--top", type=int, default=5, help="rows shown per breakdown in the text report")
     run.add_argument("--quiet", action="store_true", help="do not print the text report")
 
+    chk = sub.add_parser("check", help="report data gaps in the inputs, ranked by exposure")
+    _common(chk)
+    chk.add_argument("--top", type=int, default=10, help="names listed per issue")
+
     lev = sub.add_parser("leverage", help="largest scale of the book that a given equity supports")
     _common(lev)
     lev.add_argument("--equity", type=float, required=True, help="account equity in base currency")
@@ -59,6 +64,10 @@ def main(argv: list[str] | None = None) -> int:
     except (InputError, FileNotFoundError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
+
+    if args.command == "check":
+        print(format_quality(data_quality(model, top=args.top)))
+        return 0
 
     if args.command == "run":
         result = compute(model)

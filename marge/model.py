@@ -114,6 +114,8 @@ def _read_table(source) -> pd.DataFrame:
         return pd.DataFrame()
     if isinstance(source, pd.DataFrame):
         return source.copy()
+    if str(source).lower().endswith((".xlsx", ".xlsm", ".xls")):
+        return pd.read_excel(source)
     return pd.read_csv(source, keep_default_na=True)
 
 
@@ -143,6 +145,7 @@ class Model:
     assets: pd.DataFrame
     issuers: pd.DataFrame
     warnings: list = field(default_factory=list)
+    securities_given: set = field(default_factory=set)   # symbols present in the input master
 
     # ---------------------------------------------------------------- arrays
     def __post_init__(self):
@@ -511,4 +514,4 @@ def build_model(positions, securities=None, baskets=None, params: dict | None = 
     P["ref_group"] = [int(S.at[r, "group"]) for r in P["reference"]]
     P["ref_country"] = [S.at[r, "country"] for r in P["reference"]]
     return Model(params=params, positions=P, lines=L, securities=S, assets=A, issuers=I,
-                 warnings=warnings)
+                 warnings=warnings, securities_given=set(sec.index))

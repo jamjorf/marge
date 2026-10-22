@@ -1,7 +1,7 @@
 """Configuration loading.
 
-A run is configured by an optional TOML file whose tables mirror the tree in
-``marge.params.DEFAULTS``. Only the keys you set are overridden; everything
+A run is configured by an optional TOML (or JSON) file whose tables mirror the
+tree in ``marge.params.DEFAULTS``. Only the keys you set are overridden; everything
 else keeps its default. Example::
 
     base_currency = "USD"
@@ -20,8 +20,16 @@ else keeps its default. Example::
 
 from __future__ import annotations
 
-import tomllib
+import json
 from pathlib import Path
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python < 3.11
+    try:
+        import tomli as tomllib
+    except ModuleNotFoundError:
+        tomllib = None
 
 from .params import COUNTRY_GROUPS, default_params
 
@@ -64,13 +72,23 @@ def merge(base: dict, override: dict) -> dict:
     return base
 
 
+def read_config(path: str | Path) -> dict:
+    """Read a TOML or JSON (``.json``) config file."""
+    path = Path(path)
+    if path.suffix.lower() == ".json":
+        return json.loads(path.read_text())
+    if tomllib is None:
+        raise ValueError(f"cannot read {path}: TOML needs Python 3.11+ (or tomli); use a .json config")
+    with open(path, "rb") as fh:
+        return tomllib.load(fh)
+
+
 def load_params(path: str | Path | None = None, overrides: dict | None = None) -> dict:
-    """Build the parameter tree from defaults, an optional TOML file and a dict."""
+    """Build the parameter tree from defaults, an optional TOML/JSON file and a dict."""
     params = default_params()
     params["country_groups"] = dict(COUNTRY_GROUPS)
     if path:
-        with open(path, "rb") as fh:
-            merge(params, tomllib.load(fh))
+        merge(params, read_config(path))
     if overrides:
         merge(params, overrides)
     params["base_currency"] = str(params["base_currency"]).upper()

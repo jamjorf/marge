@@ -6,3 +6,4 @@ dist/
 .venv/
 out/
 *.out
+dist/

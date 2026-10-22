@@ -153,7 +153,8 @@ def scale_model(model: Model, k: float) -> Model:
     for c in ("quantity", "mv", "units"):
         P[c] = P[c] * k
     return Model(params=model.params, positions=P, lines=model.lines, securities=model.securities,
-                 assets=model.assets, issuers=model.issuers, warnings=[])
+                 assets=model.assets, issuers=model.issuers, warnings=[],
+                 securities_given=model.securities_given)
 
 
 def max_scale(model: Model, equity_value: float, tol: float = 1e-4) -> tuple[float, Result]:

@@ -29,17 +29,19 @@ classes can be supplied as inputs so the aggregation stays complete.
 3. [Inputs](#inputs)
 4. [Command line](#command-line)
 5. [Python API](#python-api)
-6. [Outputs](#outputs)
-7. [How the requirement is calculated](#how-the-requirement-is-calculated)
-8. [Configuration reference](#configuration-reference)
-9. [Validation](#validation)
-10. [Assumptions and limitations](#assumptions-and-limitations)
+6. [Use as a Claude skill](#use-as-a-claude-skill)
+7. [Outputs](#outputs)
+8. [How the requirement is calculated](#how-the-requirement-is-calculated)
+9. [Configuration reference](#configuration-reference)
+10. [Validation](#validation)
+11. [Assumptions and limitations](#assumptions-and-limitations)
 
 ---
 
 ## Install
 
-You need Python 3.11+ with `numpy` and `pandas`.
+You need Python 3.9+ with `numpy` and `pandas`. TOML configs need Python 3.11+
+or the `tomli` package; JSON configs work everywhere.
 
 ```bash
 pip install -e .            # installs the `marge` command
@@ -106,9 +108,10 @@ a bisection search rather than dividing equity by the requirement.
 
 ## Inputs
 
-There are three CSV files and one optional TOML file. Column names are not case
-sensitive, and common aliases are accepted (for example `qty` for `quantity`
-and `ticker` for `symbol`).
+There are three CSV files and one optional TOML or JSON config. Excel
+(`.xlsx`) files work in place of the CSVs. Column names are not case sensitive,
+and common aliases are accepted (for example `qty` for `quantity` and `ticker`
+for `symbol`).
 
 ### 1. `positions.csv` (required)
 
@@ -166,10 +169,11 @@ missing, they come from the first line found.
 
 ETF issuers publish daily holdings files that can be converted to this format.
 
-### 4. `config.toml` (optional)
+### 4. `config.toml` or `config.json` (optional)
 
 This file sets the market state, FX rates and any parameter overrides. See
-[Configuration reference](#configuration-reference).
+[Configuration reference](#configuration-reference). A `.json` file with the
+same structure as nested objects works too.
 
 ```toml
 base_currency = "USD"
@@ -189,12 +193,20 @@ HKD = 0.128
 ## Command line
 
 ```
+marge check    -p POSITIONS [-s SECURITIES] [-b BASKETS] [-c CONFIG] [--top N]
+
 marge run      -p POSITIONS [-s SECURITIES] [-b BASKETS] [-c CONFIG]
                [--as-of YYYY-MM-DD] [--vix X] [--vix-ema X] [--base-currency CCY]
                [--json FILE|-] [--detail-dir DIR] [--top N] [--quiet]
 
 marge leverage -p POSITIONS ... --equity AMOUNT
 ```
+
+* `check`: lists gaps in the inputs, ranked by the share of gross exposure they
+  affect, together with the default each gap falls back to. The gaps covered
+  are: names missing from the security master, missing or unrecognised
+  countries, missing sectors, missing market caps, missing ADV or price, and
+  ETFs without holdings. Run it before `run`, and fill the largest gaps first.
 
 * `--json`: writes a machine-readable summary (all components, worst scenarios
   and key breakdowns). Pass `-` to print it to stdout.
@@ -226,6 +238,35 @@ convenient for what-if analysis. `marge.engine.max_scale(model, equity)` returns
 the largest uniform scale of the book whose requirement fits the equity.
 
 ---
+
+## Use as a Claude skill
+
+`marge` ships as an Agent Skill, so you can use it in regular Claude (claude.ai,
+the Claude apps, or the API). Ask something like *"here are my holdings; how
+much leverage would a prime broker give me?"* and Claude will:
+
+1. turn the holdings into the input files;
+2. fill in the security data, using your files, its tools or estimates it
+   labels as such;
+3. run `check` and `run`;
+4. explain the requirement, what drives it, and how to lower it.
+
+Build the bundle:
+
+```bash
+python tools/build_skill.py      # -> dist/marge.skill (a zip) and dist/marge/
+```
+
+Install it in claude.ai under **Settings → Capabilities → Skills → Upload
+skill**. Choose `dist/marge.skill`, renaming it to `marge.zip` if the uploader
+asks for a `.zip`. Code execution must be enabled. The skill bundles this
+package, so it needs only `numpy` and `pandas`, which the code-execution sandbox
+already has.
+
+The skill's own instructions live in `skill/` (`SKILL.md`, `references/inputs.md`
+and the `scripts/marge_cli.py` launcher). The build script adds a copy of the
+`marge` package, the examples, blank input templates, and this README as
+`references/guide.md`. Re-run it after changing the code.
 
 ## Outputs
 

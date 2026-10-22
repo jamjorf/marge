@@ -204,6 +204,36 @@ class OptionTests(unittest.TestCase):
         self.assertLessEqual(r.equity["theta"]["total"], 0)
 
 
+class InputTests(unittest.TestCase):
+    def test_json_config_matches_toml(self):
+        import json
+        import tempfile
+        toml_params = load_params(EXAMPLES / "config.toml")
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "config.json"
+            path.write_text(json.dumps({"market": {"vix": 18.0, "vix_ema": 17.5, "rate": 0.04},
+                                        "fx_rates": {"JPY": 0.0067, "HKD": 0.128, "TWD": 0.031}}))
+            json_params = load_params(path)
+        self.assertEqual(json_params["market"], toml_params["market"])
+        self.assertEqual(json_params["fx_rates"], toml_params["fx_rates"])
+
+    def test_missing_position_fx_rate_is_an_error(self):
+        from marge import InputError
+        with self.assertRaises(InputError):
+            make([dict(symbol="JP", quantity=100, price=1000.0, currency="JPY")], [sec("JP", currency="JPY")])
+
+    def test_check_ranks_gaps_by_exposure(self):
+        from marge.checks import data_quality
+        m = make([dict(symbol="A", quantity=1000, price=100.0), dict(symbol="B", quantity=10, price=100.0),
+                  dict(symbol="Z", quantity=500, price=100.0)],
+                 [sec("A", mcap=float("nan")), sec("B", mcap=float("nan"), country="Atlantis")])
+        issues = {i["issue"]: i for i in data_quality(m)["issues"]}
+        self.assertEqual(issues["market cap missing"]["count"], 3)
+        self.assertTrue(issues["market cap missing"]["largest"][0].startswith("A "))
+        self.assertEqual(issues["not in security master"]["count"], 1)
+        self.assertEqual(issues["country not in group table"]["count"], 1)
+
+
 class ExampleTests(unittest.TestCase):
     def test_example_portfolio_cli(self):
         out = io.StringIO()
