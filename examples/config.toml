@@ -1,0 +1,12 @@
+# Example configuration: market state and FX rates (local currency -> USD).
+base_currency = "USD"
+
+[market]
+vix = 18.0      # spot VIX
+vix_ema = 17.5  # 5-day exponential average of VIX
+rate = 0.04     # flat rate for option pricing
+
+[fx_rates]
+JPY = 0.0067
+HKD = 0.128
+TWD = 0.031

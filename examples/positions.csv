@@ -1,0 +1,18 @@
+symbol,quantity,price,type,basket,leverage,underlying,put_call,strike,expiry,implied_vol,multiplier
+AAPL,20000,230.00,stock,,,,,,,,
+MSFT,-6000,420.00,stock,,,,,,,,
+NVDA,15000,180.00,stock,,,,,,,,
+GOOGL,-8000,190.00,stock,,,,,,,,
+GOOG,7000,192.00,stock,,,,,,,,
+JPM,-9000,240.00,stock,,,,,,,,
+XOM,12000,115.00,stock,,,,,,,,
+TSM,-6000,190.00,stock,,,,,,,,
+7203.T,30000,2900,stock,,,,,,,,
+0700.HK,-10000,480.00,stock,,,,,,,,
+SMOL,250000,4.10,stock,,,,,,,,
+TINY,-40000,0.60,stock,,,,,,,,
+MEGA,-30000,100.00,etf,MEGA,1,,,,,,
+MEGA3X,20000,45.00,etf,MEGA,3,,,,,,
+AAPL 2026-12-18 C250,-200,6.50,option,,,AAPL,C,250,2026-12-18,0.28,100
+NVDA 2026-11-20 P160,300,5.20,option,,,NVDA,P,160,2026-11-20,0.45,100
+MEGA 2027-03-19 P90,500,2.40,option,,,MEGA,P,90,2027-03-19,0.22,100
